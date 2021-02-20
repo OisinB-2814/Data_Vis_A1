@@ -1,0 +1,105 @@
+---
+title: "Assignment1_OisinBrannock"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+```
+
+```{r}
+df <- read.csv("assignment1.csv")
+```
+
+```{r}
+df <- as_tibble(df)
+```
+
+```{r}
+str(df)
+```
+
+```{r echo=TRUE}
+head(df)
+```
+
+```{r, fig.align='center'}
+g1 <- df %>% ggplot(aes(x=var_a, y=var_b, color=country)) +
+  geom_point() +
+  ggtitle("Analysis: Country Performance", subtitle = 'Stock ggplot2 scatterplot only using colour and axis labelling') +
+  xlab("Variable a") +
+  ylab("Variable b") +
+  scale_color_manual(values = c("black","green","blue","red"), name = "Country",
+                     labels = c("England", "Ireland", "Scotland", "Wales"))
+  
+g1
+```
+
+```{r, fig.align='center'}
+g2 <- df %>% ggplot(aes(x=var_a, y=var_b, color=country, shape=country, alpha=country)) +
+  geom_point(size=5) +
+  scale_color_manual(values = c("black","green","blue","red"), name = "Country",
+                     labels = c("England", "Ireland", "Scotland", "Wales")) +
+  scale_alpha_manual(values = c(1,1,0.7,0.4), name = "Country",
+                     labels = c("England", "Ireland", "Scotland", "Wales")) +
+  scale_shape_manual(values = c(1,2,0,4), name = "Country",
+                     labels = c("England", "Ireland", "Scotland", "Wales")) +
+  ggtitle("Analysis: Country Performance", subtitle = 'Incorporation of size, shape, transparency and a custom theme') +
+  xlab("Variable a") +
+  ylab("Variable b") +
+  scale_x_continuous(breaks = c(4,6,8,10,12,14,16,18,20)) +
+  
+  theme(panel.background = element_rect(fill = 'white'),
+        panel.grid.major = element_line(size = 0.25, linetype = "solid", 
+                                        color = "lightgrey"),
+        panel.grid.minor = element_line(size = 0.1, linetype = "solid",
+                                        color = "lightgrey"),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(face = "bold", size = 11),
+        legend.text = element_text(face = "italic", size = 10),
+        plot.title = element_text(face = "bold", size = 14))
+g2
+```
+
+```{r}
+df <- df %>% 
+  rename(Variable_a = var_a, Variable_b = var_b, Country = country)
+```
+
+```{r}
+
+# https://stackoverflow.com/questions/16249570/uppercase-the-first-letter-in-data-frame
+
+capFirst <- function(s) {
+    paste(toupper(substring(s, 1, 1)), substring(s, 2), sep = "")
+}
+
+df$Country <- capFirst(df$Country)
+```
+
+```{r}
+df_stats<- df %>%
+  group_by(Country) %>%
+    summarize(Cor_ab = cor(Variable_a, Variable_b),
+            Mean_a = mean(Variable_a),
+            Mean_b = mean(Variable_b), 
+            Std_a = sd(Variable_a), 
+            Std_b = sd(Variable_b))
+```
+
+```{r}
+df_stats %>%
+  kbl(caption = "<center>Data Summary</center>") %>%
+  kable_material(c("hover"))
+```
+
+
+
